@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>セカイクラベ ─ 国の大きさ、感じてみたい？</title>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        #controls {
+            background: #2c3e50;
+            color: white;
+            padding: 15px 20px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+            z-index: 1000;
+        }
+
+        #controls h1 {
+            font-size: 24px;
+            margin-bottom: 10px;
+        }
+
+        .control-group {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+
+        label {
+            font-weight: 500;
+        }
+
+        #countryInput {
+            padding: 8px 12px;
+            border: none;
+            border-radius: 4px;
+            font-size: 14px;
+            min-width: 200px;
+        }
+
+        button {
+            background: #3498db;
+            color: white;
+            border: none;
+            padding: 8px 20px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 500;
+            transition: background 0.3s;
+        }
+
+        button:hover {
+            background: #2980b9;
+        }
+
+        button:active {
+            transform: translateY(1px);
+        }
+
+        #clearBtn {
+            background: #e74c3c;
+        }
+
+        #clearBtn:hover {
+            background: #c0392b;
+        }
+
+        #locationBtn {
+            background: #27ae60;
+        }
+
+        #locationBtn:hover {
+            background: #229954;
+        }
+
+        #copyBtn {
+            background: #9b59b6;
+        }
+
+        #copyBtn:hover {
+            background: #8e44ad;
+        }
+
+        #map {
+            flex: 1;
+            width: 100%;
+            position: relative;
+        }
+
+        #status {
+            margin-top: 8px;
+            font-size: 13px;
+            color: #ecf0f1;
+            min-height: 20px;
+        }
+
+        .error {
+            color: #e74c3c;
+        }
+
+        .success {
+            color: #2ecc71;
+        }
+    </style>
+</head>
+<body>
+    <div id="controls">
+        <h1>セカイクラベ ─ 国の大きさ、感じてみたい？</h1>
+        <div class="control-group">
+            <label for="countryInput">国名:</label>
+            <input type="text" id="countryInput" placeholder="例: 日本, アメリカ, フランス (または Japan, United States, France)" />
+            <label style="display: flex; align-items: center; gap: 5px; cursor: pointer;">
+                <input type="checkbox" id="landOnlyCheckbox" checked />
+                陸地のみ表示
+            </label>
+            <button id="showBtn">表示</button>
+            <button id="clearBtn">クリア</button>
+            <button id="locationBtn">現在地に移動</button>
+        </div>
+        <div id="status"></div>
+    </div>
+    <div id="map"></div>
+
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <script src="app.js"></script>
+</body>
+</html>
