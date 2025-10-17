@@ -408,5 +408,11 @@ const voiceWidget = new VoiceInputWidget({
     extractNoun: false, // 国名/島名は短いので名詞抽出は不要
     triggerText: '🎤',
     activeText: '🎙️',
-    position: 'fixed'
+    position: 'fixed',
+    onWordExtracted: (word) => {
+        // 音声入力後、自動的に表示ボタンをクリック
+        setTimeout(() => {
+            document.getElementById('showBtn').click();
+        }, 100);
+    }
 });
