@@ -400,3 +400,13 @@ document.getElementById('islandInput').addEventListener('keypress', (e) => {
 
 // 初期メッセージ
 showStatus('国名または島名を入力して「表示」ボタンをクリックしてください');
+
+// 音声入力ウィジェットの初期化
+const voiceWidget = new VoiceInputWidget({
+    targetIds: ['islandInput'],
+    maxLength: 50,
+    extractNoun: false, // 国名/島名は短いので名詞抽出は不要
+    triggerText: '🎤',
+    activeText: '🎙️',
+    position: 'fixed'
+});
