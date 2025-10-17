@@ -81,10 +81,6 @@ function centerGeoJSON(geojson, targetCenter) {
     const offsetLat = targetCenter.lat - currentCenter.lat;
     const offsetLng = targetCenter.lng - currentCenter.lng;
 
-    console.log('現在の島の中心:', currentCenter);
-    console.log('目標の中心:', targetCenter);
-    console.log('オフセット:', { lat: offsetLat, lng: offsetLng });
-
     const newGeojson = JSON.parse(JSON.stringify(geojson));
 
     function shiftCoordinates(coords) {
@@ -150,19 +146,14 @@ async function showIslandCoastline(islandName) {
         const nominatimData = await nominatimResponse.json();
 
         if (nominatimData.length === 0) {
-            throw new Error('指定された島が見つかりません');
+            throw new Error('見つかりません');
         }
 
         const islandData = nominatimData[0];
 
         if (islandData.geojson) {
-            console.log('元のGeoJSONタイプ:', islandData.geojson.type);
-            console.log('元のGeoJSON:', islandData.geojson);
-
             // GeoJSONを現在の地図中心に配置
             const centeredGeojson = centerGeoJSON(islandData.geojson, currentCenter);
-
-            console.log('移動後のGeoJSON:', centeredGeojson);
 
             const layer = L.geoJSON(centeredGeojson, {
                 style: {
@@ -177,7 +168,7 @@ async function showIslandCoastline(islandName) {
             return;
         }
 
-        throw new Error('島の形状データが見つかりません');
+        throw new Error('見つかりません');
 
     } catch (error) {
         showStatus(`エラー: ${error.message}`, true);
