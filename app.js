@@ -11,6 +11,9 @@ L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
 let coastlineLayers = [];
 // 中心ピンマーカー
 let centerMarker = null;
+// 最後のリクエスト時刻（レート制限対策）
+let lastRequestTime = 0;
+const MIN_REQUEST_INTERVAL = 1000; // 1秒
 
 // ステータス表示用の関数
 function showStatus(message, isError = false) {
@@ -257,17 +260,32 @@ async function showCoastline(inputName) {
             searchQuery = `${englishName} Japan`;
         }
 
+        // レート制限対策: 前回のリクエストから一定時間待機
+        const now = Date.now();
+        const timeSinceLastRequest = now - lastRequestTime;
+        if (timeSinceLastRequest < MIN_REQUEST_INTERVAL) {
+            const waitTime = MIN_REQUEST_INTERVAL - timeSinceLastRequest;
+            showStatus(`リクエスト制限のため${Math.ceil(waitTime / 1000)}秒待機中...`);
+            await new Promise(resolve => setTimeout(resolve, waitTime));
+        }
+        lastRequestTime = Date.now();
+
         // Nominatim APIでデータを取得
         const nominatimUrl = `https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(searchQuery)}&format=json&polygon_geojson=1&limit=1`;
 
+        showStatus('データを読み込み中...');
         const nominatimResponse = await fetch(nominatimUrl, {
+            method: 'GET',
             headers: {
-                'User-Agent': 'CoastlineViewer/1.0'
+                'Accept': 'application/json'
             }
         });
 
         if (!nominatimResponse.ok) {
-            throw new Error('データの取得に失敗しました');
+            if (nominatimResponse.status === 403) {
+                throw new Error('アクセスが制限されています。しばらく待ってから再度お試しください');
+            }
+            throw new Error(`データの取得に失敗しました (${nominatimResponse.status})`);
         }
 
         const nominatimData = await nominatimResponse.json();
