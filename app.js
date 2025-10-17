@@ -40,9 +40,128 @@ const islandNameMap = {
     '宮古島': 'Miyako Island'
 };
 
-// 島名を英語に変換
-function translateIslandName(islandName) {
-    return islandNameMap[islandName] || islandName;
+// 世界の国名マッピング
+const countryNameMap = {
+    '日本': 'Japan',
+    'アメリカ': 'United States',
+    'アメリカ合衆国': 'United States',
+    '米国': 'United States',
+    'イギリス': 'United Kingdom',
+    '英国': 'United Kingdom',
+    'フランス': 'France',
+    'ドイツ': 'Germany',
+    'イタリア': 'Italy',
+    'スペイン': 'Spain',
+    'カナダ': 'Canada',
+    '中国': 'China',
+    '韓国': 'South Korea',
+    '北朝鮮': 'North Korea',
+    'ロシア': 'Russia',
+    'オーストラリア': 'Australia',
+    'ブラジル': 'Brazil',
+    'インド': 'India',
+    'メキシコ': 'Mexico',
+    'アルゼンチン': 'Argentina',
+    'エジプト': 'Egypt',
+    '南アフリカ': 'South Africa',
+    'タイ': 'Thailand',
+    'ベトナム': 'Vietnam',
+    'フィリピン': 'Philippines',
+    'インドネシア': 'Indonesia',
+    'マレーシア': 'Malaysia',
+    'シンガポール': 'Singapore',
+    'ニュージーランド': 'New Zealand',
+    'トルコ': 'Turkey',
+    'ギリシャ': 'Greece',
+    'ポーランド': 'Poland',
+    'オランダ': 'Netherlands',
+    'ベルギー': 'Belgium',
+    'スイス': 'Switzerland',
+    'オーストリア': 'Austria',
+    'スウェーデン': 'Sweden',
+    'ノルウェー': 'Norway',
+    'デンマーク': 'Denmark',
+    'フィンランド': 'Finland',
+    'ポルトガル': 'Portugal',
+    'チェコ': 'Czech Republic',
+    'ハンガリー': 'Hungary',
+    'ルーマニア': 'Romania',
+    'ウクライナ': 'Ukraine',
+    'サウジアラビア': 'Saudi Arabia',
+    'イラン': 'Iran',
+    'イラク': 'Iraq',
+    'イスラエル': 'Israel',
+    'チリ': 'Chile',
+    'ペルー': 'Peru',
+    'コロンビア': 'Colombia',
+    'ベネズエラ': 'Venezuela',
+    'アイスランド': 'Iceland',
+    'グリーンランド': 'Greenland'
+};
+
+// 島名または国名を英語に変換
+function translateName(name) {
+    // まず島名として検索
+    if (islandNameMap[name]) {
+        return { english: islandNameMap[name], type: 'island' };
+    }
+    // 次に国名として検索
+    if (countryNameMap[name]) {
+        return { english: countryNameMap[name], type: 'country' };
+    }
+    // 見つからない場合はそのまま返す（英語名の可能性）
+    return { english: name, type: 'unknown' };
+}
+
+// ポリゴンの面積を計算（簡易的な方法）
+function calculatePolygonArea(coordinates) {
+    if (!coordinates || coordinates.length === 0) return 0;
+
+    // GeoJSON形式 [lng, lat] の座標配列の場合
+    if (typeof coordinates[0][0] === 'number' && typeof coordinates[0][1] === 'number') {
+        let area = 0;
+        for (let i = 0; i < coordinates.length - 1; i++) {
+            area += (coordinates[i][0] * coordinates[i + 1][1]) - (coordinates[i + 1][0] * coordinates[i][1]);
+        }
+        return Math.abs(area / 2);
+    }
+
+    // ネストされた配列の場合、最初の要素（外側のリング）を使用
+    if (Array.isArray(coordinates[0])) {
+        return calculatePolygonArea(coordinates[0]);
+    }
+
+    return 0;
+}
+
+// GeoJSONから最大のポリゴンのみを抽出（メインランド）
+function extractMainlandFromGeoJSON(geojson) {
+    const newGeojson = JSON.parse(JSON.stringify(geojson));
+
+    if (newGeojson.type === 'Polygon') {
+        // 単一ポリゴンの場合はそのまま返す
+        return newGeojson;
+    } else if (newGeojson.type === 'MultiPolygon') {
+        // MultiPolygonの場合、最大のポリゴンを抽出
+        let maxArea = 0;
+        let mainlandPolygon = null;
+
+        for (const polygon of newGeojson.coordinates) {
+            const area = calculatePolygonArea(polygon[0]); // 外側のリングのみ
+            if (area > maxArea) {
+                maxArea = area;
+                mainlandPolygon = polygon;
+            }
+        }
+
+        // Polygonタイプとして返す
+        return {
+            type: 'Polygon',
+            coordinates: mainlandPolygon
+        };
+    }
+
+    return newGeojson;
 }
 
 // GeoJSONの中心座標を計算
@@ -104,12 +223,14 @@ function centerGeoJSON(geojson, targetCenter) {
 }
 
 // 海岸線データを取得して表示する関数
-async function showIslandCoastline(islandName) {
+async function showCoastline(inputName) {
     try {
         showStatus('海岸線データを読み込み中...');
 
-        // 島名を英語に変換
-        const englishIslandName = translateIslandName(islandName);
+        // 名前を英語に変換し、タイプを判定
+        const translated = translateName(inputName);
+        const englishName = translated.english;
+        const type = translated.type;
 
         // 現在の地図の中心座標を保存
         const currentCenter = map.getCenter();
@@ -130,17 +251,23 @@ async function showIslandCoastline(islandName) {
         }).addTo(map);
         centerMarker.bindPopup('中心点').openPopup();
 
-        // まずNominatim APIで島の情報を取得
-        const nominatimUrl = `https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(englishIslandName + ' Japan')}&format=json&polygon_geojson=1&limit=1`;
+        // 検索クエリを構築（島の場合はJapanを追加）
+        let searchQuery = englishName;
+        if (type === 'island') {
+            searchQuery = `${englishName} Japan`;
+        }
+
+        // Nominatim APIでデータを取得
+        const nominatimUrl = `https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(searchQuery)}&format=json&polygon_geojson=1&limit=1`;
 
         const nominatimResponse = await fetch(nominatimUrl, {
             headers: {
-                'User-Agent': 'JapaneseIslandViewer/1.0'
+                'User-Agent': 'CoastlineViewer/1.0'
             }
         });
 
         if (!nominatimResponse.ok) {
-            throw new Error('島データの取得に失敗しました');
+            throw new Error('データの取得に失敗しました');
         }
 
         const nominatimData = await nominatimResponse.json();
@@ -149,11 +276,17 @@ async function showIslandCoastline(islandName) {
             throw new Error('見つかりません');
         }
 
-        const islandData = nominatimData[0];
+        const data = nominatimData[0];
 
-        if (islandData.geojson) {
+        if (data.geojson) {
+            // 国の場合はメインランドのみを抽出
+            let processedGeojson = data.geojson;
+            if (type === 'country' || type === 'unknown') {
+                processedGeojson = extractMainlandFromGeoJSON(data.geojson);
+            }
+
             // GeoJSONを現在の地図中心に配置
-            const centeredGeojson = centerGeoJSON(islandData.geojson, currentCenter);
+            const centeredGeojson = centerGeoJSON(processedGeojson, currentCenter);
 
             const layer = L.geoJSON(centeredGeojson, {
                 style: {
@@ -164,7 +297,8 @@ async function showIslandCoastline(islandName) {
             }).addTo(map);
 
             coastlineLayers.push(layer);
-            showStatus(`${islandName}の海岸線を表示しました`);
+            const displayMode = (type === 'country' || type === 'unknown') ? '（メインランドのみ）' : '';
+            showStatus(`${inputName}の海岸線を表示しました${displayMode}`);
             return;
         }
 
@@ -240,11 +374,11 @@ function goToCurrentLocation() {
 
 // イベントリスナーの設定
 document.getElementById('showBtn').addEventListener('click', () => {
-    const islandName = document.getElementById('islandInput').value.trim();
-    if (islandName) {
-        showIslandCoastline(islandName);
+    const inputName = document.getElementById('islandInput').value.trim();
+    if (inputName) {
+        showCoastline(inputName);
     } else {
-        showStatus('島名を入力してください', true);
+        showStatus('国名または島名を入力してください', true);
     }
 });
 
@@ -265,4 +399,4 @@ document.getElementById('islandInput').addEventListener('keypress', (e) => {
 });
 
 // 初期メッセージ
-showStatus('島名を入力して「表示」ボタンをクリックしてください');
+showStatus('国名または島名を入力して「表示」ボタンをクリックしてください');
