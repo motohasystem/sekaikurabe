@@ -99,7 +99,14 @@ const countryNameMap = {
     'コロンビア': 'Colombia',
     'ベネズエラ': 'Venezuela',
     'アイスランド': 'Iceland',
-    'グリーンランド': 'Greenland'
+    'グリーンランド': 'Greenland',
+    'バチカン': 'Vatican City',
+    'バチカン市国': 'Vatican City',
+    'モナコ': 'Monaco',
+    'サンマリノ': 'San Marino',
+    'リヒテンシュタイン': 'Liechtenstein',
+    'ルクセンブルク': 'Luxembourg',
+    'マルタ': 'Malta'
 };
 
 // 島名または国名を英語に変換
@@ -235,29 +242,42 @@ async function showCoastline(inputName) {
         const englishName = translated.english;
         const type = translated.type;
 
-        // 現在の地図の中心座標を保存
-        const currentCenter = map.getCenter();
-
-        // 中心にピンマーカーを追加（既存のピンがあれば削除）
+        // 中心座標を決定（ピンがあればピンの位置、なければ地図の中心）
+        let currentCenter;
         if (centerMarker) {
-            map.removeLayer(centerMarker);
+            // 既存のピンがある場合、その位置を中心として使用
+            currentCenter = centerMarker.getLatLng();
+            console.log(`ピンの位置を中心に使用: lat=${currentCenter.lat}, lng=${currentCenter.lng}`);
+        } else {
+            // ピンがない場合、地図の中心を使用してピンを作成
+            currentCenter = map.getCenter();
+            centerMarker = L.marker([currentCenter.lat, currentCenter.lng], {
+                icon: L.icon({
+                    iconUrl: 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-2x-red.png',
+                    shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/images/marker-shadow.png',
+                    iconSize: [25, 41],
+                    iconAnchor: [12, 41],
+                    popupAnchor: [1, -34],
+                    shadowSize: [41, 41]
+                })
+            }).addTo(map);
+            centerMarker.bindPopup('中心点').openPopup();
+            console.log(`新しいピンを作成: lat=${currentCenter.lat}, lng=${currentCenter.lng}`);
         }
-        centerMarker = L.marker([currentCenter.lat, currentCenter.lng], {
-            icon: L.icon({
-                iconUrl: 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-2x-red.png',
-                shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/images/marker-shadow.png',
-                iconSize: [25, 41],
-                iconAnchor: [12, 41],
-                popupAnchor: [1, -34],
-                shadowSize: [41, 41]
-            })
-        }).addTo(map);
-        centerMarker.bindPopup('中心点').openPopup();
 
-        // 検索クエリを構築（島の場合はJapanを追加）
+        // 検索クエリを構築
         let searchQuery = englishName;
+        let searchParams = `q=${encodeURIComponent(searchQuery)}&format=json&polygon_geojson=1`;
+
         if (type === 'island') {
+            // 島の場合はJapanを追加
             searchQuery = `${englishName} Japan`;
+            searchParams = `q=${encodeURIComponent(searchQuery)}&format=json&polygon_geojson=1&limit=5`;
+        } else if (type === 'country') {
+            // 国の場合は国レベルの結果を優先（複数取得してフィルタリング）
+            searchParams = `q=${encodeURIComponent(searchQuery)}&format=json&polygon_geojson=1&limit=5`;
+        } else {
+            searchParams = `q=${encodeURIComponent(searchQuery)}&format=json&polygon_geojson=1&limit=5`;
         }
 
         // レート制限対策: 前回のリクエストから一定時間待機
@@ -271,7 +291,7 @@ async function showCoastline(inputName) {
         lastRequestTime = Date.now();
 
         // Nominatim APIでデータを取得
-        const nominatimUrl = `https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(searchQuery)}&format=json&polygon_geojson=1&limit=1`;
+        const nominatimUrl = `https://nominatim.openstreetmap.org/search?${searchParams}`;
 
         showStatus('データを読み込み中...');
         const nominatimResponse = await fetch(nominatimUrl, {
@@ -294,17 +314,76 @@ async function showCoastline(inputName) {
             throw new Error('見つかりません');
         }
 
-        const data = nominatimData[0];
+        // デバッグ: APIレスポンスを確認
+        console.log('=== Nominatim API Response ===');
+        console.log(`検索: ${inputName} (${englishName})`);
+        console.log(`結果数: ${nominatimData.length}`);
+        nominatimData.forEach((item, index) => {
+            console.log(`結果${index + 1}: ${item.display_name}`);
+            console.log(`  - type: ${item.type}, class: ${item.class}, place_rank: ${item.place_rank}`);
+            console.log(`  - geojson type: ${item.geojson ? item.geojson.type : 'なし'}`);
+        });
+
+        // 適切な結果を選択（国や島レベルの結果を優先）
+        let data = nominatimData[0];
+
+        if (type === 'country') {
+            // 国の場合、typeが'administrative'で、かつplace_rankが低い（=より広域）ものを優先
+            const countryResult = nominatimData.find(item =>
+                (item.type === 'administrative' && item.place_rank <= 8) ||
+                item.type === 'country' ||
+                item.class === 'boundary' && item.type === 'administrative'
+            );
+            if (countryResult) {
+                data = countryResult;
+                console.log(`国レベルの結果を選択: ${data.display_name}`);
+            }
+        } else if (type === 'island') {
+            // 島の場合、typeが'island'のものを優先
+            const islandResult = nominatimData.find(item => item.type === 'island');
+            if (islandResult) {
+                data = islandResult;
+                console.log(`島の結果を選択: ${data.display_name}`);
+            }
+        }
+
+        console.log('=== 選択されたデータ ===');
+        console.log(`display_name: ${data.display_name}`);
+        console.log(`geojson: ${data.geojson ? 'あり' : 'なし'}`);
+        if (data.geojson) {
+            console.log(`geojson type: ${data.geojson.type}`);
+            console.log('geojson:', data.geojson);
+        }
 
         if (data.geojson) {
             // 国の場合はメインランドのみを抽出
             let processedGeojson = data.geojson;
             if (type === 'country' || type === 'unknown') {
                 processedGeojson = extractMainlandFromGeoJSON(data.geojson);
+                console.log('=== メインランド抽出後 ===');
+                console.log(`type: ${processedGeojson.type}`);
+                console.log('processedGeojson:', processedGeojson);
             }
+
+            // 座標点数をカウント
+            let coordCount = 0;
+            if (processedGeojson.type === 'Polygon') {
+                coordCount = processedGeojson.coordinates[0].length;
+            } else if (processedGeojson.type === 'MultiPolygon') {
+                processedGeojson.coordinates.forEach(polygon => {
+                    coordCount += polygon[0].length;
+                });
+            }
+            console.log(`座標点数: ${coordCount}`);
 
             // GeoJSONを現在の地図中心に配置
             const centeredGeojson = centerGeoJSON(processedGeojson, currentCenter);
+            console.log('=== 座標変換後 ===');
+            console.log('centeredGeojson:', centeredGeojson);
+
+            // バウンディングボックスを計算
+            const bounds = calculateGeoJSONCenter(centeredGeojson);
+            console.log(`中心座標: lat=${bounds.lat}, lng=${bounds.lng}`);
 
             const layer = L.geoJSON(centeredGeojson, {
                 style: {
@@ -315,6 +394,7 @@ async function showCoastline(inputName) {
             }).addTo(map);
 
             coastlineLayers.push(layer);
+            console.log('地図にレイヤーを追加しました');
             const displayMode = (type === 'country' || type === 'unknown') ? '（メインランドのみ）' : '';
             showStatus(`${inputName}の海岸線を表示しました${displayMode}`);
             return;
@@ -389,6 +469,34 @@ function goToCurrentLocation() {
         }
     );
 }
+
+// 地図上でのピン配置機能
+function placePin(lat, lng) {
+    // 既存のピンがあれば削除
+    if (centerMarker) {
+        map.removeLayer(centerMarker);
+    }
+
+    // 新しいピンを作成
+    centerMarker = L.marker([lat, lng], {
+        icon: L.icon({
+            iconUrl: 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-2x-red.png',
+            shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/images/marker-shadow.png',
+            iconSize: [25, 41],
+            iconAnchor: [12, 41],
+            popupAnchor: [1, -34],
+            shadowSize: [41, 41]
+        })
+    }).addTo(map);
+
+    centerMarker.bindPopup('中心点').openPopup();
+    showStatus('ピンを配置しました。国名/島名を入力して表示してください');
+}
+
+// 地図クリックイベント
+map.on('click', (e) => {
+    placePin(e.latlng.lat, e.latlng.lng);
+});
 
 // イベントリスナーの設定
 document.getElementById('showBtn').addEventListener('click', () => {
