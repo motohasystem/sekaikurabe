@@ -12,18 +12,22 @@
  */
 class VoiceInputWidget {
     constructor(options = {}) {
+        // デバイス検出を先に実行
+        const isTouchDevice = this.isTouchDevice();
+
         // オプションのデフォルト値
         this.options = {
             targetIds: options.targetIds || [],
             maxLength: options.maxLength || 20,
             extractNoun: options.extractNoun !== false, // デフォルトtrue
             extractNounPhraseOnly: options.extractNounPhraseOnly || false, // 名詞句のみ抽出モード
-            triggerText: options.triggerText || 'ホバーで音声入力',
+            triggerText: options.triggerText || (isTouchDevice ? 'タップで音声入力' : 'ホバーで音声入力'),
             activeText: options.activeText || '音声入力中...',
             unsupportedText: options.unsupportedText || '音声認識が利用できません',
             onWordExtracted: options.onWordExtracted || null,
             kuromojiDicPath: options.kuromojiDicPath || 'node_modules/kuromoji/dict/',
-            position: options.position || 'fixed' // 'fixed' または 'inline'
+            position: options.position || 'fixed', // 'fixed' または 'inline'
+            autoTriggerButton: options.autoTriggerButton || null // 自動実行するボタンのID
         };
 
         // 状態管理
@@ -36,6 +40,21 @@ class VoiceInputWidget {
 
         // 初期化
         this.init();
+    }
+
+    /**
+     * タッチデバイスかどうかを判定
+     */
+    isTouchDevice() {
+        return 'ontouchstart' in window || navigator.maxTouchPoints > 0;
+    }
+
+    /**
+     * iOS Safariかどうかを判定
+     */
+    isIOSSafari() {
+        const userAgent = navigator.userAgent;
+        return /iPad|iPhone|iPod/.test(userAgent) && /Safari/.test(userAgent) && !/CriOS|FxiOS/.test(userAgent);
     }
 
     /**
@@ -123,8 +142,31 @@ class VoiceInputWidget {
      * イベントリスナーの追加
      */
     attachEventListeners() {
-        this.trigger.addEventListener('mouseenter', () => this.startRecognition());
-        this.trigger.addEventListener('mouseleave', () => this.stopRecognition());
+        // iOS対応: タッチデバイスではタップイベントを使用
+        if (this.isTouchDevice()) {
+            this.trigger.addEventListener('touchstart', (e) => {
+                e.preventDefault();
+                this.startRecognition();
+            });
+            this.trigger.addEventListener('touchend', (e) => {
+                e.preventDefault();
+                // タッチデバイスでは一定時間後に自動停止
+                setTimeout(() => this.stopRecognition(), 5000);
+            });
+            // フォールバック用のクリックイベント
+            this.trigger.addEventListener('click', (e) => {
+                e.preventDefault();
+                if (!this.isRecording) {
+                    this.startRecognition();
+                } else {
+                    this.stopRecognition();
+                }
+            });
+        } else {
+            // デスクトップではマウスイベント
+            this.trigger.addEventListener('mouseenter', () => this.startRecognition());
+            this.trigger.addEventListener('mouseleave', () => this.stopRecognition());
+        }
     }
 
     /**
@@ -153,8 +195,15 @@ class VoiceInputWidget {
         // 音声認識インスタンスを作成
         this.recognition = new SpeechRecognition();
         this.recognition.lang = 'ja-JP';
-        this.recognition.continuous = true;
-        this.recognition.interimResults = true;
+
+        // iOS Safari対応: continuousとinterimResultsの設定を調整
+        if (this.isIOSSafari()) {
+            this.recognition.continuous = false;
+            this.recognition.interimResults = false;
+        } else {
+            this.recognition.continuous = true;
+            this.recognition.interimResults = true;
+        }
 
         // イベントハンドラを設定
         this.recognition.onresult = (event) => this.handleRecognitionResult(event);
@@ -207,13 +256,19 @@ class VoiceInputWidget {
      */
     handleRecognitionEnd() {
         if (this.isRecording) {
-            try {
-                this.recognition.start();
-            } catch (e) {
-                console.error('再開エラー:', e);
-                this.isRecording = false;
-                this.trigger.classList.remove('voice-input-active');
-                this.trigger.querySelector('.voice-input-trigger-text').textContent = this.options.triggerText;
+            // iOS Safari対応: continuousがfalseの場合は自動再開しない
+            if (!this.isIOSSafari() && this.recognition.continuous) {
+                try {
+                    this.recognition.start();
+                } catch (e) {
+                    console.error('再開エラー:', e);
+                    this.isRecording = false;
+                    this.trigger.classList.remove('voice-input-active');
+                    this.trigger.querySelector('.voice-input-trigger-text').textContent = this.options.triggerText;
+                }
+            } else {
+                // iOS Safariでは一回の認識で終了
+                this.stopRecognition();
             }
         }
     }
@@ -251,6 +306,22 @@ class VoiceInputWidget {
 
         // テキストエリアに表示
         this.targetInputs[this.currentIndex].value = wordToDisplay;
+        
+        // 自動実行機能: 対応するボタンを自動クリック
+        if (this.options.autoTriggerButton) {
+            const targetInput = this.targetInputs[this.currentIndex];
+            const buttonId = this.options.autoTriggerButton;
+            const button = document.getElementById(buttonId);
+            
+            if (button) {
+                // 少し遅延を入れてボタンをクリック
+                setTimeout(() => {
+                    button.click();
+                    console.log(`音声入力後に${buttonId}ボタンを自動実行しました`);
+                }, 500);
+            }
+        }
+        
         this.currentIndex = (this.currentIndex + 1) % this.targetInputs.length;
 
         // カスタムコールバック

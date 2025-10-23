@@ -31,6 +31,10 @@
     transition: all 0.3s ease;
     box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
     opacity: 0.3;
+    /* タッチデバイス対応 */
+    -webkit-tap-highlight-color: transparent;
+    user-select: none;
+    -webkit-user-select: none;
 }
 
 /* inlineモードでのトリガーブロック: 小さなボタン */
@@ -49,6 +53,18 @@
     opacity: 1;
     transform: scale(1.1);
     box-shadow: 0 15px 40px rgba(0, 0, 0, 0.4);
+}
+
+/* タッチデバイス用のアクティブ状態 */
+@media (hover: none) and (pointer: coarse) {
+    .voice-input-trigger-block {
+        opacity: 0.8;
+    }
+    
+    .voice-input-trigger-block:active {
+        opacity: 1;
+        transform: scale(1.05);
+    }
 }
 
 .voice-input-trigger-block.voice-input-active {

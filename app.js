@@ -351,7 +351,7 @@ function goToCurrentLocation() {
         },
         (error) => {
             let errorMessage = '位置情報の取得に失敗しました';
-            switch(error.code) {
+            switch (error.code) {
                 case error.PERMISSION_DENIED:
                     errorMessage = '位置情報の使用が許可されていません';
                     break;
@@ -408,5 +408,6 @@ const voiceWidget = new VoiceInputWidget({
     extractNoun: false, // 国名/島名は短いので名詞抽出は不要
     triggerText: '🎤',
     activeText: '🎙️',
-    position: 'fixed'
+    position: 'fixed',
+    autoTriggerButton: 'showBtn' // 音声入力後に自動で表示ボタンをクリック
 });
