@@ -1,0 +1,9 @@
+{
+  "permissions": {
+    "allow": [
+      "Read(//c/Users/ddssk/Documents/MotohaSystem/Experiments/20251016_overlappingmapping/tutorial-widget/**)"
+    ],
+    "deny": [],
+    "ask": []
+  }
+}

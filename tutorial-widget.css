@@ -1,0 +1,189 @@
+/**
+ * Tutorial Widget Styles
+ */
+
+/* オーバーレイ */
+.tutorial-widget-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 10000;
+  animation: tutorial-widget-fade-in 0.3s ease-out;
+}
+
+@keyframes tutorial-widget-fade-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+/* モーダル本体 */
+.tutorial-widget-modal {
+  background: white;
+  border-radius: 12px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+  max-width: 600px;
+  width: 90%;
+  max-height: 80vh;
+  display: flex;
+  flex-direction: column;
+  position: relative;
+  animation: tutorial-widget-slide-up 0.3s ease-out;
+}
+
+@keyframes tutorial-widget-slide-up {
+  from {
+    transform: translateY(20px);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+/* 閉じるボタン */
+.tutorial-widget-close {
+  position: absolute;
+  top: 16px;
+  right: 16px;
+  background: none;
+  border: none;
+  font-size: 28px;
+  line-height: 1;
+  color: #666;
+  cursor: pointer;
+  padding: 4px 8px;
+  border-radius: 4px;
+  transition: all 0.2s;
+  z-index: 1;
+}
+
+.tutorial-widget-close:hover {
+  background-color: #f0f0f0;
+  color: #333;
+}
+
+/* コンテンツエリア */
+.tutorial-widget-content {
+  padding: 40px 32px 24px;
+  overflow-y: auto;
+  flex: 1;
+}
+
+.tutorial-widget-content h1,
+.tutorial-widget-content h2,
+.tutorial-widget-content h3 {
+  margin-top: 0;
+  color: #333;
+}
+
+.tutorial-widget-content p {
+  line-height: 1.6;
+  color: #555;
+}
+
+.tutorial-widget-content img {
+  max-width: 100%;
+  height: auto;
+  border-radius: 8px;
+}
+
+/* フッター */
+.tutorial-widget-footer {
+  padding: 16px 32px 24px;
+  border-top: 1px solid #e0e0e0;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 16px;
+}
+
+/* チェックボックス */
+.tutorial-widget-checkbox {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  cursor: pointer;
+  user-select: none;
+  color: #666;
+  font-size: 14px;
+}
+
+.tutorial-widget-checkbox input[type="checkbox"] {
+  cursor: pointer;
+  width: 18px;
+  height: 18px;
+}
+
+.tutorial-widget-checkbox:hover {
+  color: #333;
+}
+
+/* ナビゲーションボタン */
+.tutorial-widget-buttons {
+  display: flex;
+  gap: 12px;
+}
+
+.tutorial-widget-nav-btn {
+  padding: 10px 24px;
+  background-color: #007bff;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  font-size: 16px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s;
+  min-width: 100px;
+}
+
+.tutorial-widget-nav-btn:hover {
+  background-color: #0056b3;
+  transform: translateY(-1px);
+  box-shadow: 0 2px 8px rgba(0, 123, 255, 0.3);
+}
+
+.tutorial-widget-nav-btn:active {
+  transform: translateY(0);
+}
+
+/* レスポンシブ対応 */
+@media (max-width: 640px) {
+  .tutorial-widget-modal {
+    width: 95%;
+    max-height: 90vh;
+  }
+
+  .tutorial-widget-content {
+    padding: 32px 20px 16px;
+  }
+
+  .tutorial-widget-footer {
+    padding: 12px 20px 20px;
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .tutorial-widget-buttons {
+    justify-content: stretch;
+  }
+
+  .tutorial-widget-nav-btn {
+    width: 100%;
+  }
+
+  .tutorial-widget-checkbox {
+    justify-content: center;
+  }
+}

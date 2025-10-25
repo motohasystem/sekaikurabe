@@ -232,24 +232,28 @@ async function showCoastline(inputName) {
         const englishName = translated.english;
         const type = translated.type;
 
-        // 現在の地図の中心座標を保存
-        const currentCenter = map.getCenter();
-
-        // 中心にピンマーカーを追加（既存のピンがあれば削除）
+        // 中心座標を決定（ピンがあればピンの位置、なければ地図の中心）
+        let currentCenter;
         if (centerMarker) {
-            map.removeLayer(centerMarker);
+            // 既存のピンがある場合、その位置を中心として使用
+            currentCenter = centerMarker.getLatLng();
+            console.log(`ピンの位置を中心に使用: lat=${currentCenter.lat}, lng=${currentCenter.lng}`);
+        } else {
+            // ピンがない場合、地図の中心を使用してピンを作成
+            currentCenter = map.getCenter();
+            centerMarker = L.marker([currentCenter.lat, currentCenter.lng], {
+                icon: L.icon({
+                    iconUrl: 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-2x-red.png',
+                    shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/images/marker-shadow.png',
+                    iconSize: [25, 41],
+                    iconAnchor: [12, 41],
+                    popupAnchor: [1, -34],
+                    shadowSize: [41, 41]
+                })
+            }).addTo(map);
+            centerMarker.bindPopup('中心点');
+            console.log(`新しいピンを作成: lat=${currentCenter.lat}, lng=${currentCenter.lng}`);
         }
-        centerMarker = L.marker([currentCenter.lat, currentCenter.lng], {
-            icon: L.icon({
-                iconUrl: 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-2x-red.png',
-                shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/images/marker-shadow.png',
-                iconSize: [25, 41],
-                iconAnchor: [12, 41],
-                popupAnchor: [1, -34],
-                shadowSize: [41, 41]
-            })
-        }).addTo(map);
-        centerMarker.bindPopup('中心点').openPopup();
 
         // 検索クエリを構築（島の場合はJapanを追加）
         let searchQuery = englishName;
@@ -372,6 +376,35 @@ function goToCurrentLocation() {
     );
 }
 
+// 地図上でのピン配置機能
+function placePin(lat, lng) {
+    // 既存のピンがあれば削除
+    if (centerMarker) {
+        map.removeLayer(centerMarker);
+    }
+
+    // 新しいピンを作成
+    centerMarker = L.marker([lat, lng], {
+        icon: L.icon({
+            iconUrl: 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-2x-red.png',
+            shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/images/marker-shadow.png',
+            iconSize: [25, 41],
+            iconAnchor: [12, 41],
+            popupAnchor: [1, -34],
+            shadowSize: [41, 41]
+        })
+    }).addTo(map);
+
+    // ポップアップは設定するが、マップを移動させないように開かない
+    centerMarker.bindPopup('中心点');
+    showStatus('ピンを配置しました。国名/島名を入力して表示してください');
+}
+
+// 地図クリックイベント
+map.on('click', (e) => {
+    placePin(e.latlng.lat, e.latlng.lng);
+});
+
 // イベントリスナーの設定
 document.getElementById('showBtn').addEventListener('click', () => {
     const inputName = document.getElementById('islandInput').value.trim();
@@ -409,5 +442,21 @@ const voiceWidget = new VoiceInputWidget({
     triggerText: '🎤',
     activeText: '🎙️',
     position: 'fixed',
-    autoTriggerButton: 'showBtn' // 音声入力後に自動で表示ボタンをクリック
+    onWordExtracted: (word) => {
+        // 音声入力後、自動的に表示ボタンをクリック
+        setTimeout(() => {
+            document.getElementById('showBtn').click();
+        }, 100);
+    }
+});
+
+// チュートリアルウィジェットの初期化
+const tutorial = new TutorialWidget({
+    configUrl: 'tutorial-config.json',
+    storageKey: 'sekai-kurabe-tutorial-dismissed'
+});
+
+// ページ読み込み完了後にチュートリアルを表示
+window.addEventListener('DOMContentLoaded', () => {
+    tutorial.init();
 });
