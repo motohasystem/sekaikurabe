@@ -1,10 +1,10 @@
 // 地図の初期化
-const map = L.map('map').setView([36.5, 138], 6);
+const map = L.map("map").setView([36.5, 138], 6);
 
 // OpenStreetMapタイルレイヤーを追加
-L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
     attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
-    maxZoom: 19
+    maxZoom: 19,
 }).addTo(map);
 
 // 海岸線レイヤーを保存するための変数
@@ -17,110 +17,110 @@ const MIN_REQUEST_INTERVAL = 1000; // 1秒
 
 // ステータス表示用の関数
 function showStatus(message, isError = false) {
-    const statusDiv = document.getElementById('status');
+    const statusDiv = document.getElementById("status");
     statusDiv.textContent = message;
-    statusDiv.className = isError ? 'error' : 'success';
+    statusDiv.className = isError ? "error" : "success";
 }
 
 // 日本の主要な島の名前マッピング
 const islandNameMap = {
-    '本州': 'Honshu',
-    '北海道': 'Hokkaido',
-    '九州': 'Kyushu',
-    '四国': 'Shikoku',
-    '沖縄本島': 'Okinawa Island',
-    '沖縄': 'Okinawa Island',
-    '佐渡島': 'Sado Island',
-    '佐渡': 'Sado Island',
-    '淡路島': 'Awaji Island',
-    '淡路': 'Awaji Island',
-    '対馬': 'Tsushima',
-    '壱岐': 'Iki',
-    '種子島': 'Tanegashima',
-    '屋久島': 'Yakushima',
-    '奄美大島': 'Amami Oshima',
-    '石垣島': 'Ishigaki Island',
-    '宮古島': 'Miyako Island'
+    本州: "Honshu",
+    北海道: "Hokkaido",
+    九州: "Kyushu",
+    四国: "Shikoku",
+    沖縄本島: "Okinawa Island",
+    沖縄: "Okinawa Island",
+    佐渡島: "Sado Island",
+    佐渡: "Sado Island",
+    淡路島: "Awaji Island",
+    淡路: "Awaji Island",
+    対馬: "Tsushima",
+    壱岐: "Iki",
+    種子島: "Tanegashima",
+    屋久島: "Yakushima",
+    奄美大島: "Amami Oshima",
+    石垣島: "Ishigaki Island",
+    宮古島: "Miyako Island",
 };
 
 // 世界の国名マッピング
 const countryNameMap = {
-    '日本': 'Japan',
-    'アメリカ': 'United States',
-    'アメリカ合衆国': 'United States',
-    '米国': 'United States',
-    'イギリス': 'United Kingdom',
-    '英国': 'United Kingdom',
-    'フランス': 'France',
-    'ドイツ': 'Germany',
-    'イタリア': 'Italy',
-    'スペイン': 'Spain',
-    'カナダ': 'Canada',
-    '中国': 'China',
-    '韓国': 'South Korea',
-    '北朝鮮': 'North Korea',
-    'ロシア': 'Russia',
-    'オーストラリア': 'Australia',
-    'ブラジル': 'Brazil',
-    'インド': 'India',
-    'メキシコ': 'Mexico',
-    'アルゼンチン': 'Argentina',
-    'エジプト': 'Egypt',
-    '南アフリカ': 'South Africa',
-    'タイ': 'Thailand',
-    'ベトナム': 'Vietnam',
-    'フィリピン': 'Philippines',
-    'インドネシア': 'Indonesia',
-    'マレーシア': 'Malaysia',
-    'シンガポール': 'Singapore',
-    'ニュージーランド': 'New Zealand',
-    'トルコ': 'Turkey',
-    'ギリシャ': 'Greece',
-    'ポーランド': 'Poland',
-    'オランダ': 'Netherlands',
-    'ベルギー': 'Belgium',
-    'スイス': 'Switzerland',
-    'オーストリア': 'Austria',
-    'スウェーデン': 'Sweden',
-    'ノルウェー': 'Norway',
-    'デンマーク': 'Denmark',
-    'フィンランド': 'Finland',
-    'ポルトガル': 'Portugal',
-    'チェコ': 'Czech Republic',
-    'ハンガリー': 'Hungary',
-    'ルーマニア': 'Romania',
-    'ウクライナ': 'Ukraine',
-    'サウジアラビア': 'Saudi Arabia',
-    'イラン': 'Iran',
-    'イラク': 'Iraq',
-    'イスラエル': 'Israel',
-    'チリ': 'Chile',
-    'ペルー': 'Peru',
-    'コロンビア': 'Colombia',
-    'ベネズエラ': 'Venezuela',
-    'アイスランド': 'Iceland',
-    'グリーンランド': 'Greenland',
-    'バチカン': 'Vatican City',
-    'バチカン市国': 'Vatican City',
-    'モナコ': 'Monaco',
-    'サンマリノ': 'San Marino',
-    'リヒテンシュタイン': 'Liechtenstein',
-    'ルクセンブルク': 'Luxembourg',
-    'マルタ': 'Malta'
+    日本: "Japan",
+    アメリカ: "United States",
+    アメリカ合衆国: "United States",
+    米国: "United States",
+    イギリス: "United Kingdom",
+    英国: "United Kingdom",
+    フランス: "France",
+    ドイツ: "Germany",
+    イタリア: "Italy",
+    スペイン: "Spain",
+    カナダ: "Canada",
+    中国: "China",
+    韓国: "South Korea",
+    北朝鮮: "North Korea",
+    ロシア: "Russia",
+    オーストラリア: "Australia",
+    ブラジル: "Brazil",
+    インド: "India",
+    メキシコ: "Mexico",
+    アルゼンチン: "Argentina",
+    エジプト: "Egypt",
+    南アフリカ: "South Africa",
+    タイ: "Thailand",
+    ベトナム: "Vietnam",
+    フィリピン: "Philippines",
+    インドネシア: "Indonesia",
+    マレーシア: "Malaysia",
+    シンガポール: "Singapore",
+    ニュージーランド: "New Zealand",
+    トルコ: "Turkey",
+    ギリシャ: "Greece",
+    ポーランド: "Poland",
+    オランダ: "Netherlands",
+    ベルギー: "Belgium",
+    スイス: "Switzerland",
+    オーストリア: "Austria",
+    スウェーデン: "Sweden",
+    ノルウェー: "Norway",
+    デンマーク: "Denmark",
+    フィンランド: "Finland",
+    ポルトガル: "Portugal",
+    チェコ: "Czech Republic",
+    ハンガリー: "Hungary",
+    ルーマニア: "Romania",
+    ウクライナ: "Ukraine",
+    サウジアラビア: "Saudi Arabia",
+    イラン: "Iran",
+    イラク: "Iraq",
+    イスラエル: "Israel",
+    チリ: "Chile",
+    ペルー: "Peru",
+    コロンビア: "Colombia",
+    ベネズエラ: "Venezuela",
+    アイスランド: "Iceland",
+    グリーンランド: "Greenland",
+    バチカン: "Vatican City",
+    バチカン市国: "Vatican City",
+    モナコ: "Monaco",
+    サンマリノ: "San Marino",
+    リヒテンシュタイン: "Liechtenstein",
+    ルクセンブルク: "Luxembourg",
+    マルタ: "Malta",
 };
 
 // 島名または国名を英語に変換
 function translateName(name) {
     // まず島名として検索
     if (islandNameMap[name]) {
-        return { english: islandNameMap[name], type: 'island' };
+        return { english: islandNameMap[name], type: "island" };
     }
     // 次に国名として検索
     if (countryNameMap[name]) {
-        return { english: countryNameMap[name], type: 'country' };
+        return { english: countryNameMap[name], type: "country" };
     }
     // 見つからない場合はそのまま返す（英語名の可能性）
-    return { english: name, type: 'unknown' };
+    return { english: name, type: "unknown" };
 }
 
 // ポリゴンの面積を計算（簡易的な方法）
@@ -128,10 +128,10 @@ function calculatePolygonArea(coordinates) {
     if (!coordinates || coordinates.length === 0) return 0;
 
     // GeoJSON形式 [lng, lat] の座標配列の場合
-    if (typeof coordinates[0][0] === 'number' && typeof coordinates[0][1] === 'number') {
+    if (typeof coordinates[0][0] === "number" && typeof coordinates[0][1] === "number") {
         let area = 0;
         for (let i = 0; i < coordinates.length - 1; i++) {
-            area += (coordinates[i][0] * coordinates[i + 1][1]) - (coordinates[i + 1][0] * coordinates[i][1]);
+            area += coordinates[i][0] * coordinates[i + 1][1] - coordinates[i + 1][0] * coordinates[i][1];
         }
         return Math.abs(area / 2);
     }
@@ -148,10 +148,10 @@ function calculatePolygonArea(coordinates) {
 function extractMainlandFromGeoJSON(geojson) {
     const newGeojson = JSON.parse(JSON.stringify(geojson));
 
-    if (newGeojson.type === 'Polygon') {
+    if (newGeojson.type === "Polygon") {
         // 単一ポリゴンの場合はそのまま返す
         return newGeojson;
-    } else if (newGeojson.type === 'MultiPolygon') {
+    } else if (newGeojson.type === "MultiPolygon") {
         // MultiPolygonの場合、最大のポリゴンを抽出
         let maxArea = 0;
         let mainlandPolygon = null;
@@ -166,8 +166,8 @@ function extractMainlandFromGeoJSON(geojson) {
 
         // Polygonタイプとして返す
         return {
-            type: 'Polygon',
-            coordinates: mainlandPolygon
+            type: "Polygon",
+            coordinates: mainlandPolygon,
         };
     }
 
@@ -176,11 +176,13 @@ function extractMainlandFromGeoJSON(geojson) {
 
 // GeoJSONの中心座標を計算
 function calculateGeoJSONCenter(geojson) {
-    let minLat = Infinity, maxLat = -Infinity;
-    let minLng = Infinity, maxLng = -Infinity;
+    let minLat = Infinity,
+        maxLat = -Infinity;
+    let minLng = Infinity,
+        maxLng = -Infinity;
 
     function processCoordinates(coords) {
-        if (typeof coords[0] === 'number' && typeof coords[1] === 'number') {
+        if (typeof coords[0] === "number" && typeof coords[1] === "number") {
             // [lng, lat]形式の座標点
             minLng = Math.min(minLng, coords[0]);
             maxLng = Math.max(maxLng, coords[0]);
@@ -188,19 +190,19 @@ function calculateGeoJSONCenter(geojson) {
             maxLat = Math.max(maxLat, coords[1]);
         } else if (Array.isArray(coords)) {
             // ネストされた配列
-            coords.forEach(c => processCoordinates(c));
+            coords.forEach((c) => processCoordinates(c));
         }
     }
 
-    if (geojson.type === 'Polygon') {
+    if (geojson.type === "Polygon") {
         processCoordinates(geojson.coordinates);
-    } else if (geojson.type === 'MultiPolygon') {
-        geojson.coordinates.forEach(polygon => processCoordinates(polygon));
+    } else if (geojson.type === "MultiPolygon") {
+        geojson.coordinates.forEach((polygon) => processCoordinates(polygon));
     }
 
     return {
         lat: (minLat + maxLat) / 2,
-        lng: (minLng + maxLng) / 2
+        lng: (minLng + maxLng) / 2,
     };
 }
 
@@ -213,20 +215,20 @@ function centerGeoJSON(geojson, targetCenter) {
     const newGeojson = JSON.parse(JSON.stringify(geojson));
 
     function shiftCoordinates(coords) {
-        if (typeof coords[0] === 'number' && typeof coords[1] === 'number') {
+        if (typeof coords[0] === "number" && typeof coords[1] === "number") {
             // [lng, lat]形式の座標点
             return [coords[0] + offsetLng, coords[1] + offsetLat];
         } else if (Array.isArray(coords)) {
             // ネストされた配列
-            return coords.map(c => shiftCoordinates(c));
+            return coords.map((c) => shiftCoordinates(c));
         }
         return coords;
     }
 
-    if (newGeojson.type === 'Polygon') {
+    if (newGeojson.type === "Polygon") {
         newGeojson.coordinates = shiftCoordinates(newGeojson.coordinates);
-    } else if (newGeojson.type === 'MultiPolygon') {
-        newGeojson.coordinates = newGeojson.coordinates.map(polygon => shiftCoordinates(polygon));
+    } else if (newGeojson.type === "MultiPolygon") {
+        newGeojson.coordinates = newGeojson.coordinates.map((polygon) => shiftCoordinates(polygon));
     }
 
     return newGeojson;
@@ -235,7 +237,7 @@ function centerGeoJSON(geojson, targetCenter) {
 // 海岸線データを取得して表示する関数
 async function showCoastline(inputName) {
     try {
-        showStatus('海岸線データを読み込み中...');
+        showStatus("海岸線データを読み込み中...");
 
         // 名前を英語に変換し、タイプを判定
         const translated = translateName(inputName);
@@ -253,15 +255,16 @@ async function showCoastline(inputName) {
             currentCenter = map.getCenter();
             centerMarker = L.marker([currentCenter.lat, currentCenter.lng], {
                 icon: L.icon({
-                    iconUrl: 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-2x-red.png',
-                    shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/images/marker-shadow.png',
+                    iconUrl:
+                        "https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-2x-red.png",
+                    shadowUrl: "https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/images/marker-shadow.png",
                     iconSize: [25, 41],
                     iconAnchor: [12, 41],
                     popupAnchor: [1, -34],
-                    shadowSize: [41, 41]
-                })
+                    shadowSize: [41, 41],
+                }),
             }).addTo(map);
-            centerMarker.bindPopup('中心点').openPopup();
+            centerMarker.bindPopup("中心点");
             console.log(`新しいピンを作成: lat=${currentCenter.lat}, lng=${currentCenter.lng}`);
         }
 
@@ -269,11 +272,11 @@ async function showCoastline(inputName) {
         let searchQuery = englishName;
         let searchParams = `q=${encodeURIComponent(searchQuery)}&format=json&polygon_geojson=1`;
 
-        if (type === 'island') {
+        if (type === "island") {
             // 島の場合はJapanを追加
             searchQuery = `${englishName} Japan`;
             searchParams = `q=${encodeURIComponent(searchQuery)}&format=json&polygon_geojson=1&limit=5`;
-        } else if (type === 'country') {
+        } else if (type === "country") {
             // 国の場合は国レベルの結果を優先（複数取得してフィルタリング）
             searchParams = `q=${encodeURIComponent(searchQuery)}&format=json&polygon_geojson=1&limit=5`;
         } else {
@@ -286,24 +289,24 @@ async function showCoastline(inputName) {
         if (timeSinceLastRequest < MIN_REQUEST_INTERVAL) {
             const waitTime = MIN_REQUEST_INTERVAL - timeSinceLastRequest;
             showStatus(`リクエスト制限のため${Math.ceil(waitTime / 1000)}秒待機中...`);
-            await new Promise(resolve => setTimeout(resolve, waitTime));
+            await new Promise((resolve) => setTimeout(resolve, waitTime));
         }
         lastRequestTime = Date.now();
 
         // Nominatim APIでデータを取得
         const nominatimUrl = `https://nominatim.openstreetmap.org/search?${searchParams}`;
 
-        showStatus('データを読み込み中...');
+        showStatus("データを読み込み中...");
         const nominatimResponse = await fetch(nominatimUrl, {
-            method: 'GET',
+            method: "GET",
             headers: {
-                'Accept': 'application/json'
-            }
+                Accept: "application/json",
+            },
         });
 
         if (!nominatimResponse.ok) {
             if (nominatimResponse.status === 403) {
-                throw new Error('アクセスが制限されています。しばらく待ってから再度お試しください');
+                throw new Error("アクセスが制限されています。しばらく待ってから再度お試しください");
             }
             throw new Error(`データの取得に失敗しました (${nominatimResponse.status})`);
         }
@@ -311,66 +314,67 @@ async function showCoastline(inputName) {
         const nominatimData = await nominatimResponse.json();
 
         if (nominatimData.length === 0) {
-            throw new Error('見つかりません');
+            throw new Error("見つかりません");
         }
 
         // デバッグ: APIレスポンスを確認
-        console.log('=== Nominatim API Response ===');
+        console.log("=== Nominatim API Response ===");
         console.log(`検索: ${inputName} (${englishName})`);
         console.log(`結果数: ${nominatimData.length}`);
         nominatimData.forEach((item, index) => {
             console.log(`結果${index + 1}: ${item.display_name}`);
             console.log(`  - type: ${item.type}, class: ${item.class}, place_rank: ${item.place_rank}`);
-            console.log(`  - geojson type: ${item.geojson ? item.geojson.type : 'なし'}`);
+            console.log(`  - geojson type: ${item.geojson ? item.geojson.type : "なし"}`);
         });
 
         // 適切な結果を選択（国や島レベルの結果を優先）
         let data = nominatimData[0];
 
-        if (type === 'country') {
+        if (type === "country") {
             // 国の場合、typeが'administrative'で、かつplace_rankが低い（=より広域）ものを優先
-            const countryResult = nominatimData.find(item =>
-                (item.type === 'administrative' && item.place_rank <= 8) ||
-                item.type === 'country' ||
-                item.class === 'boundary' && item.type === 'administrative'
+            const countryResult = nominatimData.find(
+                (item) =>
+                    (item.type === "administrative" && item.place_rank <= 8) ||
+                    item.type === "country" ||
+                    (item.class === "boundary" && item.type === "administrative")
             );
             if (countryResult) {
                 data = countryResult;
                 console.log(`国レベルの結果を選択: ${data.display_name}`);
             }
-        } else if (type === 'island') {
+        } else if (type === "island") {
             // 島の場合、typeが'island'のものを優先
-            const islandResult = nominatimData.find(item => item.type === 'island');
+            const islandResult = nominatimData.find((item) => item.type === "island");
             if (islandResult) {
                 data = islandResult;
                 console.log(`島の結果を選択: ${data.display_name}`);
             }
         }
 
-        console.log('=== 選択されたデータ ===');
+        console.log("=== 選択されたデータ ===");
         console.log(`display_name: ${data.display_name}`);
-        console.log(`geojson: ${data.geojson ? 'あり' : 'なし'}`);
+        console.log(`geojson: ${data.geojson ? "あり" : "なし"}`);
         if (data.geojson) {
             console.log(`geojson type: ${data.geojson.type}`);
-            console.log('geojson:', data.geojson);
+            console.log("geojson:", data.geojson);
         }
 
         if (data.geojson) {
             // 国の場合はメインランドのみを抽出
             let processedGeojson = data.geojson;
-            if (type === 'country' || type === 'unknown') {
+            if (type === "country" || type === "unknown") {
                 processedGeojson = extractMainlandFromGeoJSON(data.geojson);
-                console.log('=== メインランド抽出後 ===');
+                console.log("=== メインランド抽出後 ===");
                 console.log(`type: ${processedGeojson.type}`);
-                console.log('processedGeojson:', processedGeojson);
+                console.log("processedGeojson:", processedGeojson);
             }
 
             // 座標点数をカウント
             let coordCount = 0;
-            if (processedGeojson.type === 'Polygon') {
+            if (processedGeojson.type === "Polygon") {
                 coordCount = processedGeojson.coordinates[0].length;
-            } else if (processedGeojson.type === 'MultiPolygon') {
-                processedGeojson.coordinates.forEach(polygon => {
+            } else if (processedGeojson.type === "MultiPolygon") {
+                processedGeojson.coordinates.forEach((polygon) => {
                     coordCount += polygon[0].length;
                 });
             }
@@ -378,8 +382,8 @@ async function showCoastline(inputName) {
 
             // GeoJSONを現在の地図中心に配置
             const centeredGeojson = centerGeoJSON(processedGeojson, currentCenter);
-            console.log('=== 座標変換後 ===');
-            console.log('centeredGeojson:', centeredGeojson);
+            console.log("=== 座標変換後 ===");
+            console.log("centeredGeojson:", centeredGeojson);
 
             // バウンディングボックスを計算
             const bounds = calculateGeoJSONCenter(centeredGeojson);
@@ -387,30 +391,29 @@ async function showCoastline(inputName) {
 
             const layer = L.geoJSON(centeredGeojson, {
                 style: {
-                    color: '#3498db',
+                    color: "#3498db",
                     weight: 2,
-                    fillOpacity: 0.1
-                }
+                    fillOpacity: 0.1,
+                },
             }).addTo(map);
 
             coastlineLayers.push(layer);
-            console.log('地図にレイヤーを追加しました');
-            const displayMode = (type === 'country' || type === 'unknown') ? '（メインランドのみ）' : '';
+            console.log("地図にレイヤーを追加しました");
+            const displayMode = type === "country" || type === "unknown" ? "（メインランドのみ）" : "";
             showStatus(`${inputName}の海岸線を表示しました${displayMode}`);
             return;
         }
 
-        throw new Error('見つかりません');
-
+        throw new Error("見つかりません");
     } catch (error) {
         showStatus(`エラー: ${error.message}`, true);
-        console.error('Error:', error);
+        console.error("Error:", error);
     }
 }
 
 // すべての海岸線レイヤーをクリアする関数
 function clearCoastlines() {
-    coastlineLayers.forEach(layer => {
+    coastlineLayers.forEach((layer) => {
         map.removeLayer(layer);
     });
     coastlineLayers = [];
@@ -421,17 +424,17 @@ function clearCoastlines() {
         centerMarker = null;
     }
 
-    showStatus('表示をクリアしました');
+    showStatus("表示をクリアしました");
 }
 
 // 現在地に移動する関数
 function goToCurrentLocation() {
     if (!navigator.geolocation) {
-        showStatus('お使いのブラウザは位置情報に対応していません', true);
+        showStatus("お使いのブラウザは位置情報に対応していません", true);
         return;
     }
 
-    showStatus('現在地を取得中...');
+    showStatus("現在地を取得中...");
 
     navigator.geolocation.getCurrentPosition(
         (position) => {
@@ -440,24 +443,24 @@ function goToCurrentLocation() {
 
             // 現在地にマーカーを追加
             const marker = L.marker([lat, lon]).addTo(map);
-            marker.bindPopup('現在地').openPopup();
+            marker.bindPopup("現在地").openPopup();
 
             // 現在地にズーム
             map.setView([lat, lon], 13);
 
-            showStatus('現在地に移動しました');
+            showStatus("現在地に移動しました");
         },
         (error) => {
-            let errorMessage = '位置情報の取得に失敗しました';
-            switch(error.code) {
+            let errorMessage = "位置情報の取得に失敗しました";
+            switch (error.code) {
                 case error.PERMISSION_DENIED:
-                    errorMessage = '位置情報の使用が許可されていません';
+                    errorMessage = "位置情報の使用が許可されていません";
                     break;
                 case error.POSITION_UNAVAILABLE:
-                    errorMessage = '位置情報が利用できません';
+                    errorMessage = "位置情報が利用できません";
                     break;
                 case error.TIMEOUT:
-                    errorMessage = '位置情報の取得がタイムアウトしました';
+                    errorMessage = "位置情報の取得がタイムアウトしました";
                     break;
             }
             showStatus(errorMessage, true);
@@ -465,7 +468,7 @@ function goToCurrentLocation() {
         {
             enableHighAccuracy: true,
             timeout: 10000,
-            maximumAge: 0
+            maximumAge: 0,
         }
     );
 }
@@ -480,65 +483,79 @@ function placePin(lat, lng) {
     // 新しいピンを作成
     centerMarker = L.marker([lat, lng], {
         icon: L.icon({
-            iconUrl: 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-2x-red.png',
-            shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/images/marker-shadow.png',
+            iconUrl:
+                "https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-2x-red.png",
+            shadowUrl: "https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/images/marker-shadow.png",
             iconSize: [25, 41],
             iconAnchor: [12, 41],
             popupAnchor: [1, -34],
-            shadowSize: [41, 41]
-        })
+            shadowSize: [41, 41],
+        }),
     }).addTo(map);
 
-    centerMarker.bindPopup('中心点').openPopup();
-    showStatus('ピンを配置しました。国名/島名を入力して表示してください');
+    // ポップアップは設定するが、マップを移動させないように開かない
+    centerMarker.bindPopup("中心点");
+    showStatus("ピンを配置しました。国名/島名を入力して表示してください");
 }
 
 // 地図クリックイベント
-map.on('click', (e) => {
+map.on("click", (e) => {
     placePin(e.latlng.lat, e.latlng.lng);
 });
 
 // イベントリスナーの設定
-document.getElementById('showBtn').addEventListener('click', () => {
-    const inputName = document.getElementById('islandInput').value.trim();
+document.getElementById("showBtn").addEventListener("click", () => {
+    const inputName = document.getElementById("islandInput").value.trim();
     if (inputName) {
         showCoastline(inputName);
     } else {
-        showStatus('国名または島名を入力してください', true);
+        showStatus("国名または島名を入力してください", true);
     }
 });
 
-document.getElementById('clearBtn').addEventListener('click', () => {
+document.getElementById("clearBtn").addEventListener("click", () => {
     clearCoastlines();
-    document.getElementById('islandInput').value = '';
+    document.getElementById("islandInput").value = "";
 });
 
-document.getElementById('locationBtn').addEventListener('click', () => {
+document.getElementById("locationBtn").addEventListener("click", () => {
     goToCurrentLocation();
 });
 
 // Enterキーで検索
-document.getElementById('islandInput').addEventListener('keypress', (e) => {
-    if (e.key === 'Enter') {
-        document.getElementById('showBtn').click();
+document.getElementById("islandInput").addEventListener("keypress", (e) => {
+    if (e.key === "Enter") {
+        document.getElementById("showBtn").click();
     }
 });
 
 // 初期メッセージ
-showStatus('国名または島名を入力して「表示」ボタンをクリックしてください');
+showStatus("国名または島名を入力して「表示」ボタンをクリックしてください");
 
 // 音声入力ウィジェットの初期化
 const voiceWidget = new VoiceInputWidget({
-    targetIds: ['islandInput'],
+    targetIds: ["islandInput"],
     maxLength: 50,
     extractNoun: false, // 国名/島名は短いので名詞抽出は不要
-    triggerText: '🎤',
-    activeText: '🎙️',
-    position: 'fixed',
+    triggerText: "🎤",
+    activeText: "🎙️",
+    position: "fixed",
     onWordExtracted: (word) => {
         // 音声入力後、自動的に表示ボタンをクリック
         setTimeout(() => {
-            document.getElementById('showBtn').click();
+            document.getElementById("showBtn").click();
         }, 100);
-    }
+    },
 });
+
+// チュートリアルウィジェットの初期化
+const tutorial = new TutorialWidget({
+    configUrl: "tutorial-config.json",
+    storageKey: "sekai-kurabe-tutorial-dismissed",
+});
+
+// ページ読み込み完了後にチュートリアルを表示
+window.addEventListener("DOMContentLoaded", () => {
+    tutorial.init();
+});
+

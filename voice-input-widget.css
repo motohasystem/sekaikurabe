@@ -1,10 +1,10 @@
 /* VoiceInputWidget スタイル */
 
-/* fixedモード（デフォルト）: 左下固定 */
+/* fixedモード（デフォルト）: 右下固定 */
 .voice-input-widget-container {
     position: fixed;
     bottom: 20px;
-    left: 20px;
+    right: 20px;
     z-index: 9999;
 }
 
@@ -31,6 +31,10 @@
     transition: all 0.3s ease;
     box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
     opacity: 0.3;
+    /* タッチデバイス対応 */
+    -webkit-tap-highlight-color: transparent;
+    user-select: none;
+    -webkit-user-select: none;
 }
 
 /* inlineモードでのトリガーブロック: 小さなボタン */
@@ -49,6 +53,18 @@
     opacity: 1;
     transform: scale(1.1);
     box-shadow: 0 15px 40px rgba(0, 0, 0, 0.4);
+}
+
+/* タッチデバイス用のアクティブ状態 */
+@media (hover: none) and (pointer: coarse) {
+    .voice-input-trigger-block {
+        opacity: 0.8;
+    }
+    
+    .voice-input-trigger-block:active {
+        opacity: 1;
+        transform: scale(1.05);
+    }
 }
 
 .voice-input-trigger-block.voice-input-active {
@@ -83,7 +99,7 @@
 .voice-input-recognition-area {
     position: absolute;
     top: -20px;
-    left: 220px;
+    right: 220px;
     background: rgba(255, 255, 255, 0.95);
     border-radius: 15px;
     padding: 15px 20px;
@@ -107,18 +123,18 @@
     visibility: visible;
 }
 
-/* 吹き出しの三角形（左側中央） */
+/* 吹き出しの三角形（右側中央） */
 .voice-input-recognition-area::before {
     content: '';
     position: absolute;
     top: 50%;
-    left: -10px;
+    right: -10px;
     transform: translateY(-50%);
     width: 0;
     height: 0;
     border-top: 10px solid transparent;
     border-bottom: 10px solid transparent;
-    border-right: 10px solid rgba(255, 255, 255, 0.95);
+    border-left: 10px solid rgba(255, 255, 255, 0.95);
 }
 
 .voice-input-recognition-text {
